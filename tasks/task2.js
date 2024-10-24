@@ -7,10 +7,44 @@
 "https://jsonplaceholder.typicode.com/users - адреса куди робити запит"
 
 
-function createUser(user) {
-  // Ваш код
-}
+const https = require('https');
 
-console.log(createUser({name: "Sam", email: "fjsnfkjns2342@gmail.com"}))
+function createUser(user) {
+    const data = JSON.stringify({
+        name: user.name,
+        email: user.email
+    });
+
+    const options = {
+        hostname: 'jsonplaceholder.typicode.com',
+        path: '/users',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length
+        }
+    };
+
+    return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+            let responseData = '';
+
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+
+            res.on('end', () => {
+                resolve(JSON.parse(responseData));
+            });
+        });
+
+        req.on('error', (error) => {
+            reject(error);
+        });
+
+        req.write(data);
+        req.end();
+    });
+}
 
 module.exports = createUser;
